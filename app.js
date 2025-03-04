@@ -8,7 +8,7 @@ var usersRouter = require("./routes/users");
 var adminRouter = require("./routes/admin");
 var { engine } = require("express-handlebars"); // ✅ Correct
 var app = express();
-var fileUpload = require("express-fileupload");
+const fileUpload = require("express-fileupload");
 var db = require("./config/connection");
 
 // view engine setup

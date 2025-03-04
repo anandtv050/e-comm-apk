@@ -1,5 +1,5 @@
-const db = require('../config/connection');
-
+var db = require('../config/connection');
+var collection=require('../config/collection')
 module.exports = {
     addProduct: (product, callback) => {
 
@@ -17,9 +17,16 @@ module.exports = {
                 callback(data)
             }
              )
+              
             .catch((err) => {
                 console.error("❌ Error inserting product:", err);
                 callback(false);
             });
+    },
+    getAllProducts:()=>{
+        return new Promise(async(resolve,reject)=>{
+            let products=await db.get().collection(collection.PRODUCT_COLLECTION).find().toArray()
+            resolve(products)
+        })
     }
 };
