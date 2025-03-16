@@ -10,6 +10,8 @@ var { engine } = require("express-handlebars"); // ✅ Correct
 var app = express();
 const fileUpload = require("express-fileupload");
 var db = require("./config/connection");
+const session = require('express-session');
+
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -33,6 +35,12 @@ db.connect((err) => {
   if (err) console.log("connection failed");
   else console.log("connection Success");
 });
+app.use(session({
+  secret: 'key',  
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 600000 }  
+}));
 app.use("/", usersRouter);
 app.use("/admin", adminRouter);
 

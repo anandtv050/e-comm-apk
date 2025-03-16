@@ -1,0 +1,21 @@
+<div class="d-flex justify-content-center align-items-center vh-100 ">
+  <form method="POST" action="/doLogin" class="p-4 border rounded shadow bg-white" style="margin-top: 50px;">
+    <div class="form-group">
+
+        {{!-- {{#if loginError}} 
+        <pclass="error">Invalid User or Password</p>
+        {{/if}} --}}
+      <label for="exampleInputEmail1">Email address</label>
+      <input type="email" class="form-control" name="email" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+      <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <div class="form-group">
+      <label for="exampleInputPassword1">Password</label>
+      <input type="password" class="form-control" name="Password" id="exampleInputPassword1" placeholder="Password">
+    </div>
+    <div class="form-group form-check">
+        <a href="/sign-up">Create new Account?</a>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Login</button>
+  </form>
+</div>
