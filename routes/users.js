@@ -4,6 +4,15 @@ const userHelper = require("../helpers/user-helper");
 const { response } = require("../app");
 var router = express.Router();
 
+const verifyLogin =(req,res,next)=>{
+  console.log("session",req.session);
+  
+  if(req.session.loggedIn){
+    next()
+  }else{
+    res.redirect('/login')
+  }
+}
 /* GET home page. */
 router.get("/", function (req, res, next) {
   let user = req.session.user;
@@ -80,6 +89,10 @@ router.post("/doLogin", (req, res) => {
 router.get("/logout",(req,res)=>{
   req.session.destroy();
   res.redirect('/');
+})
+
+router.get("/cart",verifyLogin,(req,res)=>{
+  res.render('user/cart')
 })
 
 module.exports = router;
