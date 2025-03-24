@@ -34,11 +34,9 @@ router.get("/", function (req, res, next) {
   //       "https://m.media-amazon.com/images/I/61B2t2Ul9zL._AC_UF1000,1000_QL80_.jpg",
   //   },
   // ];
-  productHelper.getAllProducts().then((products)=>{
-console.log(products);
-
+  productHelper.getAllProducts().then((products) => {
     res.render("admin/view-products", { products, admin: true });
-  })
+  });
 });
 
 router.get("/add-product", function (req, res) {
@@ -59,12 +57,30 @@ router.post("/add-product", (req, res) => {
   });
 });
 
-router.get("/delete-product",(req,res)=>{
-   let productid=req.query.id;
-   console.log(productid);
-   productHelper.deletProduct(productid)
-   res.redirect('/admin/')
-   
+router.get("/delete-product", (req, res) => {
+  let productid = req.query.id;
+  productHelper.deletProduct(productid);
+  res.redirect("/admin/");
+});
+
+router.get("/edit-product", async (req, res) => {
+  let objProduct = await productHelper.getProductDetails(req.query.id);
+  res.render("admin/edit-product", { objProduct });
+});
+
+router.post("/edit-product",(req,res)=>{
+  console.log("from router",req.body);
+  
+  productHelper.updateProduct(req.query.id,req.body).then(()=>{
+    let id = req.query.id
+    res.redirect("/admin")
+    console.log("image",req.files.Image);
+    
+    if(req.files.Image){
+      let image=req.files.Image
+      image.mv('./public/product-images/'+id+'.jpg')
+    }
+  })
 })
 
 module.exports = router;
