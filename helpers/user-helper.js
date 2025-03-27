@@ -2,6 +2,10 @@ var db = require("../config/connection");
 var collection = require("../config/collection");
 const bcrypt = require("bcrypt");
 const { response } = require("../app");
+const { ObjectId, Collection } = require("mongodb"); // Make sure this is imported
+const productHelpers = require("./product-helpers");
+const { format } = require("morgan");
+
 
 module.exports = {
   doSignup: (userData) => {
@@ -37,5 +41,58 @@ module.exports = {
          
     })
     
+  },
+  addToCart:(productId,UserId)=>{
+    return new Promise(async(resolve,reject)=>{
+        let userCart = await db.get().collection(collection.CART_COLLECTION).findOne({user: new ObjectId(UserId)})
+        if(userCart){
+          await db.get().collection(collection.CART_COLLECTION).updateOne({user:new ObjectId(UserId)},
+          {
+            $push:{products:new ObjectId(productId)}
+          }).then((response)=>{
+            resolve()
+          })
+        } else {
+          let objCart ={
+            user :new ObjectId(UserId),
+            products : [new ObjectId(productId)]
+          }          
+         await db.get().collection(collection.CART_COLLECTION).insertOne(objCart).then((response)=>{
+          resolve()
+          })
+        }
+    })
+  },
+  getCarts: (UserId) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let cartItems = await db.get().collection(collection.CART_COLLECTION).aggregate([
+          {
+            $match: { user: new ObjectId(UserId) }
+          },
+          {
+            $lookup: {
+              from: collection.PRODUCT_COLLECTION,  // Ensure this is correct
+              let: { proList: '$products' },  // 'products' is the array of ObjectIds in the CART_COLLECTION
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $in: ['$_id', "$$proList"]  // This checks if the product IDs match in 'proList'
+                    }
+                  }
+                }
+              ],
+              as: 'cartItems'  // The output array with the matched products
+            }
+          }
+        ]).toArray();
+        resolve(cartItems);
+      } catch (err) {
+        console.error("Error in getCarts:", err);
+        reject(err);  // Reject the promise with an error if something goes wrong
+      }
+    });
   }
+  
 };

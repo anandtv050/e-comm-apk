@@ -1,6 +1,6 @@
 var db = require("../config/connection");
 var collection = require("../config/collection");
-const { ObjectId } = require("mongodb"); // Make sure this is imported
+const { ObjectId, Collection } = require("mongodb"); // Make sure this is imported
 const { response } = require("express");
 module.exports = {
   addProduct: (product, callback) => {

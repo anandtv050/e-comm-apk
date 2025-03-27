@@ -4,20 +4,20 @@ const userHelper = require("../helpers/user-helper");
 const { response } = require("../app");
 var router = express.Router();
 
-const verifyLogin =(req,res,next)=>{
-  console.log("session",req.session);
-  
-  if(req.session.loggedIn){
-    next()
-  }else{
-    res.redirect('/login')
+const verifyLogin = (req, res, next) => {
+  console.log("session", req.session);
+
+  if (req.session.loggedIn) {
+    next();
+  } else {
+    res.redirect("/login");
   }
-}
+};
 /* GET home page. */
 router.get("/", function (req, res, next) {
   let user = req.session.user;
-  console.log('user from /',user);
-  
+  console.log("user from /", user);
+
   // let user={name:'anand'}
   // let products = [
   //   {
@@ -50,16 +50,16 @@ router.get("/", function (req, res, next) {
   //   },
   // ];
   productHelpers.getAllProducts().then((products) => {
-    res.render("user/view-product", { products, admin: false,user });
+    res.render("user/view-product", { products, admin: false, user });
   });
 });
 
 router.get("/login", (req, res) => {
-  if(req.session.user){
+  if (req.session.user) {
     res.redirect("/");
-  }else{
-    res.render("user/login",{"loginError:res":req.session.LoginError});
-    req.session.LoginError=false
+  } else {
+    res.render("user/login", { "loginError:res": req.session.LoginError });
+    req.session.LoginError = false;
   }
 });
 
@@ -76,23 +76,31 @@ router.post("/sign-up", (req, res) => {
 router.post("/doLogin", (req, res) => {
   userHelper.doLogin(req.body).then((result) => {
     if (result.status) {
-      req.session.loggedIn = true;  
-      req.session.user = result.user;            
+      req.session.loggedIn = true;
+      req.session.user = result.user;
       res.redirect("/");
     } else {
-      res.session.LoginError=true;
+      res.session.LoginError = true;
       res.redirect("/login");
     }
   });
 });
 
-router.get("/logout",(req,res)=>{
+router.get("/logout", (req, res) => {
   req.session.destroy();
-  res.redirect('/');
-})
+  res.redirect("/");
+});
 
-router.get("/cart",verifyLogin,(req,res)=>{
-  res.render('user/cart')
-})
+router.get("/cart", verifyLogin, async (req, res) => {
+  let productList = await userHelper.getCarts(req.session.user._id);
+  console.log(typeof productList);
+  res.render("user/cart", { productList: productList[0].cartItems });
+});
+
+router.get("/add-to-cart/:id", verifyLogin, (req, res) => {
+  userHelper.addToCart(req.params.id, req.session.user._id).then(() => {
+    res.redirect("/");
+  });
+});
 
 module.exports = router;
