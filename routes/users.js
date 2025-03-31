@@ -5,8 +5,6 @@ const { response } = require("../app");
 var router = express.Router();
 
 const verifyLogin = (req, res, next) => {
-  console.log("session", req.session);
-
   if (req.session.loggedIn) {
     next();
   } else {
@@ -14,9 +12,8 @@ const verifyLogin = (req, res, next) => {
   }
 };
 /* GET home page. */
-router.get("/", function (req, res, next) {
+router.get("/", async function (req, res, next) {
   let user = req.session.user;
-  console.log("user from /", user);
 
   // let user={name:'anand'}
   // let products = [
@@ -49,8 +46,14 @@ router.get("/", function (req, res, next) {
   //       "https://m.media-amazon.com/images/I/61B2t2Ul9zL._AC_UF1000,1000_QL80_.jpg",
   //   },
   // ];
+ let  CartCount =0;
+  
+   if (req.session.user && req.session.user._id) {
+     CartCount = await  userHelper.getCartCount(req.session.user._id);
+  }
+  
   productHelpers.getAllProducts().then((products) => {
-    res.render("user/view-product", { products, admin: false, user });
+    res.render("user/view-product", { products, admin: false, user,CartCount });
   });
 });
 
@@ -97,9 +100,11 @@ router.get("/cart", verifyLogin, async (req, res) => {
   res.render("user/cart", { productList: productList[0].cartItems });
 });
 
-router.get("/add-to-cart/:id", verifyLogin, (req, res) => {
-  userHelper.addToCart(req.params.id, req.session.user._id).then(() => {
-    res.redirect("/");
+router.get("/add-to-cart", verifyLogin, (req, res) => {
+  const proID = req.query.proID; 
+  userHelper.addToCart(proID, req.session.user._id).then(() => {
+    res.json({status:true})
+    // res.redirect("/");
   });
 });
 
