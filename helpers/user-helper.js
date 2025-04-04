@@ -45,28 +45,42 @@ module.exports = {
     });
   },
   addToCart: (productId, UserId) => {
+
     return new Promise(async (resolve, reject) => {
-      let userCart = await db
-        .get()
-        .collection(collection.CART_COLLECTION)
-        .findOne({ user: new ObjectId(UserId) });
+      let proObj={
+        item:new  ObjectId(productId),
+        quantity:1
+      }
+      let userCart = await db.get().collection(collection.CART_COLLECTION).findOne({ user: new ObjectId(UserId) });     
+      console.log("userCart",userCart);
+       
       if (userCart) {
-        await db
-          .get()
-          .collection(collection.CART_COLLECTION)
-          .updateOne(
-            { user: new ObjectId(UserId) },
-            {
-              $push: { products: new ObjectId(productId) },
-            }
+        if (!userCart.products) {
+          userCart.products = [];
+        }
+        let productExist=  userCart.products.findIndex(p => p.item.toString() === productId.toString())
+        console.log("productExist",productExist);
+        
+        if(productExist!=-1){
+          db.get().collection(collection.CART_COLLECTION).updateOne(
+            { user: new ObjectId(UserId), "products.item": new ObjectId(productId) }, 
+            { $inc: { "products.$.quantity": 1 } }
           )
-          .then((response) => {
+          .then(()=>{
             resolve();
+          })
+        } else {     
+          await db.get().collection(collection.CART_COLLECTION).updateOne(
+            { user: new ObjectId(UserId) },
+            { $push: { products: proObj } }
+          ).then((response) => {
+              resolve();
           });
+        }
       } else {
         let objCart = {
           user: new ObjectId(UserId),
-          products: [new ObjectId(productId)],
+          products: [proObj],
         };
         await db
           .get()
@@ -80,32 +94,33 @@ module.exports = {
   },
   getCarts: (UserId) => {
     return new Promise(async (resolve, reject) => {
-      try {
-        let cartItems = await db
-          .get()
-          .collection(collection.CART_COLLECTION)
-          .aggregate([
-            {
+      try {        
+        console.log("UserId",UserId);
+        
+        let cartItems = await db.get().collection(collection.CART_COLLECTION).aggregate([{
               $match: { user: new ObjectId(UserId) },
             },
+
             {
-              $lookup: {
-                from: collection.PRODUCT_COLLECTION, // Ensure this is correct
-                let: { proList: "$products" }, // 'products' is the array of ObjectIds in the CART_COLLECTION
-                pipeline: [
-                  {
-                    $match: {
-                      $expr: {
-                        $in: ["$_id", "$$proList"], // This checks if the product IDs match in 'proList'
-                      },
-                    },
-                  },
-                ],
-                as: "cartItems", // The output array with the matched products
-              },
+              $unwind:'$products'
             },
+            {
+              $project:{
+                item:'$products.item',
+                quantity :'$products.quantity'
+              }
+            },
+            {
+              $lookup:{
+                from:collection.PRODUCT_COLLECTION,
+                localField:'item',
+                foreignField:'_id',
+                as:'product'
+              }
+            }
           ])
           .toArray();
+          console.log("cartItems from user helpers 119",cartItems[0].products);
         resolve(cartItems);
       } catch (err) {
         console.error("Error in getCarts:", err);

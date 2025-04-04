@@ -94,14 +94,14 @@ router.get("/logout", (req, res) => {
   res.redirect("/");
 });
 
-router.get("/cart", verifyLogin, async (req, res) => {
+router.get("/cart", verifyLogin, async (req, res) => {  
   let productList = await userHelper.getCarts(req.session.user._id);
-  console.log(typeof productList);
-  res.render("user/cart", { productList: productList[0].cartItems });
+  console.log("product list ", productList);
+  res.render("user/cart", { productList });
 });
 
 router.get("/add-to-cart", verifyLogin, (req, res) => {
-  const proID = req.query.proID; 
+  const proID = req.query.proID;   
   userHelper.addToCart(proID, req.session.user._id).then(() => {
     res.json({status:true})
     // res.redirect("/");
