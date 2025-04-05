@@ -19,16 +19,16 @@
               <tbody>
                 {{#each productList}}
                 <tr>
-                  {{#each this.product}}
+                  {{!-- {{#each this.product}} --}}
                   <td>
-                    <img src="/product-images/{{this._id}}.jpg" class="img-thumbnail" style="width: 70px; height: 70px;">
+                    <img src="/product-images/{{this.product._id}}.jpg" class="img-thumbnail" style="width: 70px; height: 70px;">
                   </td>
-                  <td>{{this.name}}</td>
-                  {{/each}}
+                  <td>{{this.product.name}}</td>
+                  {{!-- {{/each}} --}}
                   <td>
-                    <button class="btn btn-outline-secondary btn-sm">-</button>
-                    <span class="mx-2">{{this.quantity}}</span>
-                    <button class="btn btn-outline-secondary btn-sm">+</button>
+                    <button id="decreseQuantity" class="btn btn-outline-secondary btn-sm" onclick="changeQuantity('{{this._id}}','{{this.product._id}}',-1)">-</button>
+                    <span id="{{this.product._id}}" class="mx-2">{{this.quantity}}</span>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="changeQuantity('{{this._id}}','{{this.product._id}}',1)">+</button>
                   </td>
                   <td>
                     <a href="#" class="btn btn-danger btn-sm">Remove</a>

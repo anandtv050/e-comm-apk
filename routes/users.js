@@ -108,4 +108,13 @@ router.get("/add-to-cart", verifyLogin, (req, res) => {
   });
 });
 
+router.post("/change-product-quantity", (req, res) => {
+  userHelper.changeProductQuantity(req.body).then((response) => {    
+      res.json({status:true,objresponse:response,action:req.body});
+  }).catch((err) => {
+      console.error("Error:", err);
+      res.status(500).send("Error updating product quantity");
+  });
+});
+
 module.exports = router;

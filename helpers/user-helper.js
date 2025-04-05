@@ -59,7 +59,6 @@ module.exports = {
           userCart.products = [];
         }
         let productExist=  userCart.products.findIndex(p => p.item.toString() === productId.toString())
-        console.log("productExist",productExist);
         
         if(productExist!=-1){
           db.get().collection(collection.CART_COLLECTION).updateOne(
@@ -117,10 +116,21 @@ module.exports = {
                 foreignField:'_id',
                 as:'product'
               }
-            }
-          ])
-          .toArray();
-          console.log("cartItems from user helpers 119",cartItems[0].products);
+            },
+            {
+              $addFields: {
+                product: { $arrayElemAt: ['$product', 0] },
+              },
+            },
+            {
+              $project: {
+                item: 1,
+                quantity: 1,
+                product: 1,
+              },
+            },
+          ]).toArray();
+          console.log("cartItems from user helpers 119",cartItems);
         resolve(cartItems);
       } catch (err) {
         console.error("Error in getCarts:", err);
@@ -141,4 +151,16 @@ module.exports = {
       resolve(CartCount)
     });
   },
+  changeProductQuantity:(details)=>{ 
+    count = parseInt(details.count  )
+    return new Promise((resolve,reject)=>{
+      db.get().collection(collection.CART_COLLECTION).updateOne(
+        { _id: new ObjectId(details.cart), "products.item": new ObjectId(details.product) }, 
+        { $inc: { "products.$.quantity": count } }
+      )
+      .then((response)=>{
+        resolve(response);
+      })
+    })
+  }
 };
