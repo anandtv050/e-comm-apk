@@ -13,6 +13,7 @@
                   <th scope="col">Image</th>
                   <th scope="col">Product Name</th>
                   <th scope="col">Quantity</th>
+                  <th scope="col">Price</th>
                   <th scope="col">Action</th>
                 </tr>
               </thead>
@@ -30,6 +31,7 @@
                     <span id="{{this.product._id}}" class="mx-2">{{this.quantity}}</span>
                     <button class="btn btn-outline-secondary btn-sm" onclick="changeQuantity('{{this._id}}','{{this.product._id}}',1)">+</button>
                   </td>
+                  <td>{{this.product.Price}}</td>
                   <td>
                     <a href="#" class="btn btn-danger btn-sm">Remove</a>
                   </td>
@@ -38,8 +40,9 @@
               </tbody>
             </table>
           </div>
+          <span>TotalAmount :{{totalAmount}}</span>
           <div class="card-footer text-end">
-            <a href="/checkout" class="btn btn-success">Proceed to Checkout</a>
+            <a href="/place-orders" class="btn btn-success">Proceed to Checkout</a>
           </div>
         </div>
       </div>

@@ -96,7 +96,6 @@ router.get("/logout", (req, res) => {
 
 router.get("/cart", verifyLogin, async (req, res) => {  
   let productList = await userHelper.getCarts(req.session.user._id);
-  console.log("product list ", productList);
   res.render("user/cart", { productList });
 });
 
@@ -117,4 +116,33 @@ router.post("/change-product-quantity", (req, res) => {
   });
 });
 
+router.get("/place-orders", async (req, res) => {  
+  let totalAmount = await userHelper.getTotalAmount(req.session.user._id)
+  res.render("user/checkout",{totalAmount});
+});
+
+router.post("/place-orders", async(req,res)=>{
+  if(req.body.paymentMethod == 'cod'){
+    let product = await userHelper.getCartProductList(req.session.user._id)
+    let totalAmount = await userHelper.getTotalAmount(req.session.user._id)
+    userHelper.placeOrders(req.body,product,totalAmount,req.session.user._id).then((response)=>{ 
+      res.redirect('/order-success')
+      // res.json({status:true})   
+    })
+  }
+});
+
+router.get('/order-success',(req,res)=>{
+  res.render('user/order-placed-success')
+})
+
+router.get('/view-orders',verifyLogin,async(req,res)=> {
+  let Orders = await userHelper.getAllUserOrders(req.session.user._id);  
+  res.render('user/view-orders',{user:req.session.user,Orders})
+})
+
+router.get('/view-order-products/:id',async(req,res)=> {
+  let OrderProduct = await userHelper.getOrderProducts(req.params.id);
+ res.render('user/view-order-products',{OrderProduct})
+})
 module.exports = router;

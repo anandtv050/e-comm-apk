@@ -74,7 +74,6 @@ router.post("/edit-product",(req,res)=>{
   productHelper.updateProduct(req.query.id,req.body).then(()=>{
     let id = req.query.id
     res.redirect("/admin")
-    console.log("image",req.files.Image);
     
     if(req.files.Image){
       let image=req.files.Image
